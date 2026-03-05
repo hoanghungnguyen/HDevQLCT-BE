@@ -24,8 +24,8 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
 
-    public TransactionDto createTransaction(TransactionDto dto) {
-        User user = userRepository.findById(dto.getUserId())
+    public TransactionDto createTransaction(TransactionDto dto, Integer userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -43,6 +43,44 @@ public class TransactionService {
         dto.setTransactionDate(savedTransaction.getTransactionDate());
         return dto;
     }
+
+    public TransactionDto updateTransaction(Integer id, TransactionDto dto, Integer userId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized: You can only update your own transactions");
+        }
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        transaction.setCategory(category);
+        transaction.setAmount(dto.getAmount());
+        transaction.setNote(dto.getNote());
+        transaction.setTransactionDate(dto.getTransactionDate() != null ? dto.getTransactionDate() : LocalDate.now());
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return mapToDto(savedTransaction);
+    }
+
+    public void deleteTransaction(Integer id, Integer userId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized: You can only delete your own transactions");
+        }
+
+        transactionRepository.delete(transaction);
+    }
+
+    public List<TransactionDto> getTransactionsByUserAndMonth(Integer userId, int month, int year) {
+        return transactionRepository.findByUserIdAndMonthAndYear(userId, month, year).stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
 
     public List<TransactionDto> getTransactionsByUser(Integer userId) {
         return transactionRepository.findByUserId(userId).stream()

@@ -5,6 +5,8 @@ import com.duan.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.duan.security.CustomUserDetails;
 
 import java.util.List;
 
@@ -15,17 +17,45 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<TransactionDto> createTransaction(@RequestBody TransactionDto transactionDto) {
-        return ResponseEntity.ok(transactionService.createTransaction(transactionDto));
+    public ResponseEntity<TransactionDto> createTransaction(
+            @RequestBody TransactionDto transactionDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.createTransaction(transactionDto, userDetails.getUser().getId()));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TransactionDto>> getTransactionsByUser(@PathVariable Integer userId) {
-        return ResponseEntity.ok(transactionService.getTransactionsByUser(userId));
+    @PutMapping("/{id}")
+    public ResponseEntity<TransactionDto> updateTransaction(
+            @PathVariable Integer id,
+            @RequestBody TransactionDto transactionDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.updateTransaction(id, transactionDto, userDetails.getUser().getId()));
     }
 
-    @GetMapping("/user/{userId}/stats")
-    public ResponseEntity<com.duan.dto.BalanceStatsDto> getBalanceStats(@PathVariable Integer userId) {
-        return ResponseEntity.ok(transactionService.getBalanceStats(userId));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        transactionService.deleteTransaction(id, userDetails.getUser().getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TransactionDto>> getMyTransactions(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.getTransactionsByUser(userDetails.getUser().getId()));
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<TransactionDto>> filterTransactions(
+            @RequestParam int month,
+            @RequestParam int year,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.getTransactionsByUserAndMonth(userDetails.getUser().getId(), month, year));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<com.duan.dto.BalanceStatsDto> getMyBalanceStats(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.getBalanceStats(userDetails.getUser().getId()));
     }
 }

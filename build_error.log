@@ -1,0 +1,29 @@
+
+> Task :compileJava FAILED
+D:\HDev\HDevQLCT-BE\src\main\java\com\duan\controller\TransactionController.java:59: error: cannot find symbol
+        return ResponseEntity.ok(transactionService.getBalanceStats(userDetails.getId()));
+                                                                               ^
+  symbol:   method getId()
+  location: variable userDetails of type CustomUserDetails
+1 error
+
+[Incubating] Problems report is available at: file:///D:/HDev/HDevQLCT-BE/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  D:\HDev\HDevQLCT-BE\src\main\java\com\duan\controller\TransactionController.java:59: error: cannot find symbol
+          return ResponseEntity.ok(transactionService.getBalanceStats(userDetails.getId()));
+                                                                                 ^
+    symbol:   method getId()
+    location: variable userDetails of type CustomUserDetails
+  1 error
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 2s
+1 actionable task: 1 executed
