@@ -8,6 +8,8 @@ import com.duan.repository.CategoryRepository;
 import com.duan.repository.TransactionRepository;
 import com.duan.repository.UserRepository;
 import com.duan.dto.BalanceStatsDto;
+import com.duan.dto.MonthlyTrendDto;
+import com.duan.dto.CategoryExpenseDto;
 import com.duan.model.TransactionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -115,5 +117,53 @@ public class TransactionService {
                 .totalExpense(totalExpense)
                 .balance(balance)
                 .build();
+    }
+
+    public List<MonthlyTrendDto> getMonthlyTrend(Integer userId, int year) {
+        List<Object[]> results = transactionRepository.getMonthlyTrend(userId, year);
+        // Khởi tạo List 12 tháng với giá trị 0
+        List<MonthlyTrendDto> trend = new java.util.ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            trend.add(new MonthlyTrendDto(i, year, BigDecimal.ZERO, BigDecimal.ZERO));
+        }
+
+        // Đổ data từ DB vào
+        for (Object[] row : results) {
+            int month = ((Number) row[0]).intValue();
+            BigDecimal income = row[1] != null ? new BigDecimal(row[1].toString()) : BigDecimal.ZERO;
+            BigDecimal expense = row[2] != null ? new BigDecimal(row[2].toString()) : BigDecimal.ZERO;
+
+            MonthlyTrendDto monthDto = trend.get(month - 1);
+            monthDto.setIncome(income);
+            monthDto.setExpense(expense);
+        }
+
+        return trend;
+    }
+
+    public List<CategoryExpenseDto> getCategoryExpense(Integer userId, int month, int year) {
+        List<Object[]> results = transactionRepository.getExpenseByCategory(userId, month, year);
+        
+        // Tính tổng chi tiêu trong tháng để ra %
+        BigDecimal totalExpenseMonth = results.stream()
+                .map(row -> new BigDecimal(row[1].toString()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return results.stream().map(row -> {
+            String categoryName = (String) row[0];
+            BigDecimal totalAmount = new BigDecimal(row[1].toString());
+            
+            double percentage = 0.0;
+            if (totalExpenseMonth.compareTo(BigDecimal.ZERO) > 0) {
+                percentage = totalAmount.divide(totalExpenseMonth, 4, java.math.RoundingMode.HALF_UP)
+                        .multiply(new BigDecimal("100")).doubleValue();
+            }
+
+            return CategoryExpenseDto.builder()
+                    .categoryName(categoryName)
+                    .totalAmount(totalAmount)
+                    .percentage(Math.round(percentage * 10.0) / 10.0) // Làm tròn 1 chữ số thập phân
+                    .build();
+        }).collect(Collectors.toList());
     }
 }

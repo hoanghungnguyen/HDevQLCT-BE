@@ -58,4 +58,19 @@ public class TransactionController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(transactionService.getBalanceStats(userDetails.getUser().getId()));
     }
+
+    @GetMapping("/stats/trend")
+    public ResponseEntity<List<com.duan.dto.MonthlyTrendDto>> getMonthlyTrend(
+            @RequestParam int year,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.getMonthlyTrend(userDetails.getUser().getId(), year));
+    }
+
+    @GetMapping("/stats/category")
+    public ResponseEntity<List<com.duan.dto.CategoryExpenseDto>> getCategoryExpense(
+            @RequestParam int month,
+            @RequestParam int year,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(transactionService.getCategoryExpense(userDetails.getUser().getId(), month, year));
+    }
 }
