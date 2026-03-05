@@ -5,6 +5,8 @@ import com.duan.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.duan.security.CustomUserDetails;
 
 import java.util.List;
 
@@ -19,8 +21,8 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.createCategory(categoryDto));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CategoryDto>> getCategoriesByUser(@PathVariable Integer userId) {
-        return ResponseEntity.ok(categoryService.getCategoriesByUser(userId));
+    @GetMapping
+    public ResponseEntity<List<CategoryDto>> getMyCategories(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(categoryService.getCategoriesByUser(userDetails.getUser().getId()));
     }
 }

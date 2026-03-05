@@ -14,6 +14,8 @@ public class TransactionDto {
     private Integer id;
     private Integer userId;
     private Integer categoryId;
+    private String categoryName;
+    private String type;
     private BigDecimal amount;
     private String note;
     private LocalDate transactionDate;

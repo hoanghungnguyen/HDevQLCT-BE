@@ -93,6 +93,8 @@ public class TransactionService {
                 .id(transaction.getId())
                 .userId(transaction.getUser().getId())
                 .categoryId(transaction.getCategory().getId())
+                .categoryName(transaction.getCategory().getName())
+                .type(transaction.getCategory().getType() != null ? transaction.getCategory().getType().name() : null)
                 .amount(transaction.getAmount())
                 .note(transaction.getNote())
                 .transactionDate(transaction.getTransactionDate())
