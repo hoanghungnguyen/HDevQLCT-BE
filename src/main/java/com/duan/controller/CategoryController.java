@@ -29,4 +29,16 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getMyCategories(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(categoryService.getCategoriesByUser(userDetails.getUser().getId()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(
+            @PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            categoryService.deleteCategory(id, userDetails.getUser().getId());
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

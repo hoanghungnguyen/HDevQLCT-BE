@@ -14,6 +14,7 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
     List<Transaction> findByUserId(Integer userId);
     List<Transaction> findByCategoryId(Integer categoryId);
+    boolean existsByCategoryId(Integer categoryId);
 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.id = :userId AND t.category.type = :type")
     BigDecimal sumAmountByUserIdAndType(@Param("userId") Integer userId, @Param("type") TransactionType type);
