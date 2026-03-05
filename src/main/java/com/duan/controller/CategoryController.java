@@ -17,7 +17,11 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
+    public ResponseEntity<CategoryDto> createCategory(
+            @RequestBody CategoryDto categoryDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        // Set the userId from the secure token before passing to service
+        categoryDto.setUserId(userDetails.getUser().getId());
         return ResponseEntity.ok(categoryService.createCategory(categoryDto));
     }
 
